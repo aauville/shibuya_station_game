@@ -4,12 +4,25 @@ using UnityEngine;
 
 public class MyCharacterController : MonoBehaviour
 {
+
+
+
+    public bool LRdir= false;
+    public GameObject sign;
+
     public float moveSpeed = 500f;
     private bool isDragging = false;
     private List<Vector2> pathPoints = new List<Vector2>();
 
     private SpriteRenderer spriteRenderer;
     private LineRenderer lineRenderer;
+
+    private bool allowDrag = true;
+    private bool hitGate = false;
+
+    private string gate = "R2L_Gate";
+
+
 
     private void Start()
     {
@@ -26,6 +39,12 @@ public class MyCharacterController : MonoBehaviour
         lineRenderer.startColor = Color.red;
         lineRenderer.endColor = Color.red;
         lineRenderer.textureMode = LineTextureMode.Tile;
+
+        if(LRdir == false)
+        {
+            gate = "L2R_Gate";
+        }
+
     }
 
     void Update()
@@ -65,8 +84,25 @@ public class MyCharacterController : MonoBehaviour
             isDragging = false;
         }
 
+        if (hitGate == true)
+        {
+            if (pathPoints.Count > 0)
+            {
+                Vector2 targetPosition = pathPoints[0];
+                transform.position = Vector2.MoveTowards(transform.position, targetPosition, moveSpeed*2 * Time.deltaTime);
+                if (Vector2.Distance(transform.position, targetPosition) < 0.1f)
+                {
+                    pathPoints.RemoveAt(0);
+                }
+            }
+            else if (pathPoints.Count == 0)
+            {
+                hitGate = false;
+                allowDrag = true;
+            }
+        }
         // if the character has an active path, move towards the last point in the path
-        if (pathPoints.Count > 0)
+        else if (pathPoints.Count > 0)
         {
             Vector2 targetPosition = pathPoints[0];
             transform.position = Vector2.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
@@ -84,6 +120,8 @@ public class MyCharacterController : MonoBehaviour
             // Set transparency based on distance to the character
             UpdateLineTransparency();
         }
+
+
     }
 
     // Function to clear the existing path
@@ -105,6 +143,20 @@ public class MyCharacterController : MonoBehaviour
         return vector3Array;
     }
 
+    private void wrongGate(Vector2 nm)
+    {
+        ClearPath();
+        Vector2 newPos = transform.position;
+       // pathPoints.Add(newPos+10*nm);
+        for(float i = 1; i<100; i++)
+        {
+            newPos += nm *(20f/i);
+            pathPoints.Add(newPos);
+        }
+        hitGate = true;
+        allowDrag = false;
+    }
+
     // Function to update line transparency based on distance to the character
     private void UpdateLineTransparency()
     {
@@ -118,4 +170,39 @@ public class MyCharacterController : MonoBehaviour
             lineRenderer.endColor = color;
         }
     }
+
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag(gate))
+        {
+            Vector2 hit = collision.contacts[0].normal;
+            wrongGate(hit);
+            //ClearPath()
+            allowDrag = false;
+            Animator porteAnimator = collision.gameObject.GetComponent<Animator>();
+            Animator signAnimator = sign.GetComponent<Animator>();
+            if (porteAnimator != null)
+            {
+                porteAnimator.SetTrigger("Playerhit");
+                signAnimator.SetTrigger("Playerhit");
+            }
+
+        }
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            ClearPath();
+        }
+
+    }
+
+    void OnCollisionStay2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Gate"))
+        {
+            //ClearPath();
+            allowDrag = false;
+        }
+
+    }
+
 }

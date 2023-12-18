@@ -3,7 +3,11 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Gate
+  - L2R_Gate
+  - R2L_Gate
+  - Blocking_Gate
   layers:
   - Default
   - TransparentFX
