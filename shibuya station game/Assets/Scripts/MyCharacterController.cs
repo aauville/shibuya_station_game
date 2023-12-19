@@ -9,7 +9,7 @@ public class MyCharacterController : MonoBehaviour
     public float lineSize = 1f;
     private bool isDragging = false;
     private List<Vector2> pathPoints = new List<Vector2>();
-    private GameObject destinationStation; 
+    private GameObject destinationStation;
 
     private SpriteRenderer spriteRenderer;
     private LineRenderer lineRenderer;
@@ -110,21 +110,21 @@ public class MyCharacterController : MonoBehaviour
     }
 
     public void SetDestination(GameObject destination)
-        {
-            destinationStation = destination;
-        }
+    {
+        destinationStation = destination;
+    }
 
 
     private void ArrivedAtDestination()
     {
-        if (IsAtCorrectStation(destinationStation.GetComponent<CircleCollider2D>()))
+        if (IsAtCorrectStation(destinationStation.GetComponent<BoxCollider2D>()))
         {
             GameManager.Instance.IncrementScore();
             Destroy(gameObject);
         }
     }
 
-    private bool IsAtCorrectStation(CircleCollider2D stationCollider)
+    private bool IsAtCorrectStation(BoxCollider2D stationCollider)
     {
         return stationCollider.OverlapPoint(transform.position);
     }
@@ -146,8 +146,8 @@ public class MyCharacterController : MonoBehaviour
         }
     }
 
-    public float bumpForce = 5f; 
-    public float bumpDuration = 0.5f; 
+    public float bumpForce = 5f;
+    public float bumpDuration = 0.5f;
     private bool isBumping = false;
 
 
