@@ -15,6 +15,7 @@ public class MyCharacterController : MonoBehaviour
     private LineRenderer lineRenderer;
     [SerializeField]
     public List<Sprite> characterSprites;
+    Rigidbody2D rb;
 
     private void Start()
     {
@@ -29,6 +30,7 @@ public class MyCharacterController : MonoBehaviour
         lineRenderer.endColor = Color.red;
         lineRenderer.textureMode = LineTextureMode.Tile;
         ChooseRandomSprite();
+        rb = gameObject.GetComponent<Rigidbody2D>();
     }
 
     void Update()
@@ -142,5 +144,36 @@ public class MyCharacterController : MonoBehaviour
         {
             Debug.LogWarning("No sprite defined in the list characterSprites");
         }
+    }
+
+    public float bumpForce = 5f; 
+    public float bumpDuration = 0.5f; 
+    private bool isBumping = false;
+
+
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            if (!isBumping)
+            {
+                StartCoroutine(BumpCoroutine());
+            }
+            Debug.Log("Collision entre deux personnages !");
+        }
+    }
+
+    IEnumerator BumpCoroutine()
+    {
+        isBumping = true;
+        float elapsedTime = 0f;
+        while (elapsedTime < bumpDuration)
+        {
+            float bumpForcePercentage = 1f - (elapsedTime / bumpDuration);
+            rb.velocity += (Vector2.up * bumpForce) * bumpForcePercentage;
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+        isBumping = false;
     }
 }
