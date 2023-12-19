@@ -13,6 +13,8 @@ public class MyCharacterController : MonoBehaviour
 
     private SpriteRenderer spriteRenderer;
     private LineRenderer lineRenderer;
+    [SerializeField]
+    public List<Sprite> characterSprites;
 
     private void Start()
     {
@@ -26,6 +28,7 @@ public class MyCharacterController : MonoBehaviour
         lineRenderer.startColor = Color.red;
         lineRenderer.endColor = Color.red;
         lineRenderer.textureMode = LineTextureMode.Tile;
+        ChooseRandomSprite();
     }
 
     void Update()
@@ -122,5 +125,22 @@ public class MyCharacterController : MonoBehaviour
     private bool IsAtCorrectStation(CircleCollider2D stationCollider)
     {
         return stationCollider.OverlapPoint(transform.position);
+    }
+
+    private void ChooseRandomSprite()
+    {
+        if (characterSprites != null && characterSprites.Count > 0)
+        {
+            int randomIndex = Random.Range(0, characterSprites.Count);
+            Sprite randomSprite = characterSprites[randomIndex];
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.sprite = randomSprite;
+            }
+        }
+        else
+        {
+            Debug.LogWarning("No sprite defined in the list characterSprites");
+        }
     }
 }
