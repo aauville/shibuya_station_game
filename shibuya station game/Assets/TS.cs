@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class TS : MonoBehaviour
 {
+    // Gate direction
     public bool L2R = false;
     // Start is called before the first frame update
     private Animator animator;
@@ -21,7 +22,6 @@ public class TS : MonoBehaviour
         {
             transform.gameObject.tag = "L2R_Gate";      
         }
-   
         else
         {
             transform.gameObject.tag = "R2L_Gate";
