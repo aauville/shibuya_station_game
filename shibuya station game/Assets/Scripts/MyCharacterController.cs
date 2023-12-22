@@ -17,6 +17,13 @@ public class MyCharacterController : MonoBehaviour
     public List<Sprite> characterSprites;
     Rigidbody2D rb;
 
+    private bool allowDrag = true; // [Unused] enable/disable dragging in can of problem with collisions (can still pass through if LMB is held)
+    private bool hitGate = false; // On when wrong gate hit
+
+    public bool LRdir = false; // Character direction (LR false => Right to left): should be randomized
+    private string gate = "R2L_Gate"; // Default matching gate tag (Right to Left). Is set in start() according to LRdir
+                                      // can be improved but still works
+
     private void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -31,6 +38,13 @@ public class MyCharacterController : MonoBehaviour
         lineRenderer.textureMode = LineTextureMode.Tile;
         ChooseRandomSprite();
         rb = gameObject.GetComponent<Rigidbody2D>();
+
+        // Set the correct gate tag 
+        if (LRdir == false)
+        {
+            gate = "L2R_Gate";
+        }
+
     }
 
     void Update()
@@ -60,7 +74,6 @@ public class MyCharacterController : MonoBehaviour
         {
             isDragging = false;
         }
-
         if (pathPoints.Count > 0)
         {
             Vector2 targetPosition = pathPoints[0];
@@ -70,13 +83,22 @@ public class MyCharacterController : MonoBehaviour
             {
                 pathPoints.RemoveAt(0);
             }
+            if (hitGate == false) // no trace when gate kickback 
+            {
+                // Update LineRenderer with the remaining path points
+                lineRenderer.positionCount = pathPoints.Count;
+                lineRenderer.SetPositions(ConvertVector2ToVector3(pathPoints.ToArray()));
+                UpdateLineTransparency();
 
-            lineRenderer.positionCount = pathPoints.Count;
-            lineRenderer.SetPositions(ConvertVector2ToVector3(pathPoints.ToArray()));
-            UpdateLineTransparency();
+                // Vérifie si le personnage est arrivé à destination
+                ArrivedAtDestination();
+            }
+            else if (pathPoints.Count == 0)
+            {
+                hitGate = false;
+                allowDrag = true;
+            }
 
-            // Vérifie si le personnage est arrivé à destination
-            ArrivedAtDestination();
         }
     }
 
@@ -96,6 +118,24 @@ public class MyCharacterController : MonoBehaviour
         return vector3Array;
     }
 
+    // Function to set new path (kickback) when wrong gate
+    // nm is the normal vector to the surface hit
+    private void wrongGate(Vector2 nm)
+    {
+        ClearPath();
+        Vector2 newPos = transform.position;
+        // pathPoints.Add(newPos+10*nm);
+        // Kickback effect (new trace)
+        for (float i = 1; i < 100; i++)
+        {
+            newPos += nm * (20f / i);
+            pathPoints.Add(newPos);
+        }
+        hitGate = true;
+        allowDrag = false;
+    }
+
+    // Function to update line transparency based on distance to the character
     private void UpdateLineTransparency()
     {
         for (int i = 0; i < pathPoints.Count; i++)
@@ -146,34 +186,46 @@ public class MyCharacterController : MonoBehaviour
         }
     }
 
-    public float bumpForce = 5f;
-    public float bumpDuration = 0.5f;
-    private bool isBumping = false;
-
-
+    // Function to manage collision events
     void OnCollisionEnter2D(Collision2D collision)
     {
+        if (collision.gameObject.CompareTag(gate))
+        {
+            // Generates the normal vector to the surface hit 
+            // Current collider is rectangular  (we can try circular to have better dynamics)
+            Vector2 hit = collision.contacts[0].normal;
+            wrongGate(hit);
+            //ClearPath()
+            allowDrag = false;
+
+            // Animation events
+            Animator porteAnimator = collision.gameObject.GetComponent<Animator>();
+            //Animator signAnimator = sign.GetComponent<Animator>();
+            if (porteAnimator != null)
+            {
+                porteAnimator.SetTrigger("Playerhit");
+                //signAnimator.SetTrigger("Playerhit");
+            }
+
+        }
+
+        // P2P collision
         if (collision.gameObject.CompareTag("Player"))
         {
-            if (!isBumping)
-            {
-                StartCoroutine(BumpCoroutine());
-            }
-            Debug.Log("Collision entre deux personnages !");
+            ClearPath();
         }
+
     }
 
-    IEnumerator BumpCoroutine()
+    // [Unused] Function to disable dragging when player inside of a colloder object (oui ça peut arriver et le perso continue sa route)
+    void OnCollisionStay2D(Collision2D collision)
     {
-        isBumping = true;
-        float elapsedTime = 0f;
-        while (elapsedTime < bumpDuration)
+        if (collision.gameObject.CompareTag("Gate"))
         {
-            float bumpForcePercentage = 1f - (elapsedTime / bumpDuration);
-            rb.velocity += (Vector2.up * bumpForce) * bumpForcePercentage;
-            elapsedTime += Time.deltaTime;
-            yield return null;
+            //ClearPath();
+            allowDrag = false;
         }
-        isBumping = false;
+
     }
+
 }
