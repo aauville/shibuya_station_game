@@ -38,7 +38,8 @@ public class MyCharacterController : MonoBehaviour
         lineRenderer.textureMode = LineTextureMode.Tile;
         ChooseRandomSprite();
         rb = gameObject.GetComponent<Rigidbody2D>();
-
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        Physics2D.IgnoreCollision(player.GetComponent<Collider2D>(), GetComponent<Collider2D>());
         // Set the correct gate tag 
         if (LRdir == false)
         {
@@ -49,6 +50,7 @@ public class MyCharacterController : MonoBehaviour
 
     void Update()
     {
+        // if the user touches or clicks on the character, start drawing the path
         if (Input.GetMouseButtonDown(0))
         {
             Vector2 touchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -57,28 +59,39 @@ public class MyCharacterController : MonoBehaviour
             if (hitCollider != null && hitCollider.gameObject == gameObject)
             {
                 isDragging = true;
+                // Clear the existing path when a new drag starts
                 ClearPath();
             }
         }
 
+        // if the user is dragging the character, add the current touch position to the path
         if (isDragging && Input.GetMouseButton(0))
         {
             Vector2 currentTouchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            // add the current touch position to the path
             pathPoints.Add(currentTouchPosition);
+
+            // Update LineRenderer with the new path points
             lineRenderer.positionCount = pathPoints.Count;
             lineRenderer.SetPositions(ConvertVector2ToVector3(pathPoints.ToArray()));
+
+            // Set transparency based on distance to the character
             UpdateLineTransparency();
         }
 
+        // if the user stops touching the screen, stop drawing the path
         if (Input.GetMouseButtonUp(0))
         {
             isDragging = false;
         }
+
+        // if the character has an active path, move towards the last point in the path
         if (pathPoints.Count > 0)
         {
             Vector2 targetPosition = pathPoints[0];
             transform.position = Vector2.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
 
+            // if the character has reached the last point in the path, remove that point from the path
             if (Vector2.Distance(transform.position, targetPosition) < 0.1f)
             {
                 pathPoints.RemoveAt(0);
@@ -88,18 +101,18 @@ public class MyCharacterController : MonoBehaviour
                 // Update LineRenderer with the remaining path points
                 lineRenderer.positionCount = pathPoints.Count;
                 lineRenderer.SetPositions(ConvertVector2ToVector3(pathPoints.ToArray()));
-                UpdateLineTransparency();
 
-                // Vérifie si le personnage est arrivé à destination
-                ArrivedAtDestination();
-            }
-            else if (pathPoints.Count == 0)
-            {
-                hitGate = false;
-                allowDrag = true;
+                // Set transparency based on distance to the character
+                UpdateLineTransparency();
             }
 
         }
+        else if (pathPoints.Count == 0)
+        {
+            hitGate = false;
+            allowDrag = true;
+        }
+
     }
 
     private void ClearPath()
@@ -154,7 +167,7 @@ public class MyCharacterController : MonoBehaviour
         destinationStation = destination;
     }
 
-
+    /*
     private void ArrivedAtDestination()
     {
         if (IsAtCorrectStation(destinationStation.GetComponent<BoxCollider2D>()))
@@ -168,7 +181,7 @@ public class MyCharacterController : MonoBehaviour
     {
         return stationCollider.OverlapPoint(transform.position);
     }
-
+    */
     private void ChooseRandomSprite()
     {
         if (characterSprites != null && characterSprites.Count > 0)
@@ -189,6 +202,13 @@ public class MyCharacterController : MonoBehaviour
     // Function to manage collision events
     void OnCollisionEnter2D(Collision2D collision)
     {
+        if (collision.gameObject == destinationStation)
+        {
+            GameManager.Instance.IncrementScore();
+            Destroy(gameObject);
+        }
+
+
         if (collision.gameObject.CompareTag(gate))
         {
             // Generates the normal vector to the surface hit 
@@ -225,6 +245,7 @@ public class MyCharacterController : MonoBehaviour
             //ClearPath();
             allowDrag = false;
         }
+
 
     }
 
