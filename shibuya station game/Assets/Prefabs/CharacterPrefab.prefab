@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 9043470638695838815}
   - component: {fileID: 9043470638695838808}
   - component: {fileID: 5266432425249950690}
-  - component: {fileID: 4464422320624039059}
+  - component: {fileID: -5558651592559251503}
   m_Layer: 0
   m_Name: CharacterPrefab
   m_TagString: Player
@@ -49,7 +49,7 @@ CircleCollider2D:
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
-  m_Radius: 3
+  m_Radius: 1
 --- !u!114 &9043470638695838808
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -62,7 +62,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7d162d50b74e49bbbadd5ba1e8bb785, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 100
+  moveSpeed: 150
   lineSize: 5
   characterSprites:
   - {fileID: 21300000, guid: a29605b83c1004b8e94ed222d0c98141, type: 3}
@@ -70,8 +70,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 0e0b244298de443ff99efb32072f1d02, type: 3}
   - {fileID: 21300000, guid: 9f5678de081904a07adb0d271ae5d40d, type: 3}
   - {fileID: 21300000, guid: 24616480f3f394a85be8414e8a174eda, type: 3}
-  bumpForce: 5
-  bumpDuration: 0.5
+  LRdir: 0
 --- !u!212 &5266432425249950690
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -122,7 +121,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!50 &4464422320624039059
+--- !u!50 &-5558651592559251503
 Rigidbody2D:
   serializedVersion: 4
   m_ObjectHideFlags: 0
@@ -130,16 +129,16 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9043470638695838810}
-  m_BodyType: 1
+  m_BodyType: 0
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
   m_LinearDrag: 0
   m_AngularDrag: 0.05
-  m_GravityScale: 1
+  m_GravityScale: 0
   m_Material: {fileID: 0}
-  m_Interpolate: 1
+  m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 1
-  m_Constraints: 4
+  m_CollisionDetection: 0
+  m_Constraints: 0

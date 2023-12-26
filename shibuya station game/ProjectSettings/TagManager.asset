@@ -4,14 +4,11 @@
 TagManager:
   serializedVersion: 2
   tags:
-<<<<<<< HEAD
   - Station
-=======
-  - Gate
   - L2R_Gate
+  - Gate
+  - Gatebody
   - R2L_Gate
-  - Blocking_Gate
->>>>>>> main
   layers:
   - Default
   - TransparentFX

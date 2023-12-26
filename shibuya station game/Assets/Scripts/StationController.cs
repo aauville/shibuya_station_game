@@ -22,7 +22,9 @@ public class StationController : MonoBehaviour
         {
             yield return new WaitForSeconds(Random.Range(minSpawnInterval, maxSpawnInterval));
             GameObject destinationStation = GetRandomDestinationStation();
-            GameObject character = Instantiate(CharacterPrefab, transform.position, Quaternion.identity);
+            Vector3 spawnposition = transform.position;
+            spawnposition.y -= 20; 
+            GameObject character = Instantiate(CharacterPrefab, spawnposition, Quaternion.identity);
             character.GetComponent<MyCharacterController>().SetDestination(destinationStation);
         }
     }
