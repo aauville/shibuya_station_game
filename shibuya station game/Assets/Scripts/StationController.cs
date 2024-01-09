@@ -1,17 +1,26 @@
 ﻿using System.Collections;
 using UnityEngine;
+using System.Collections.Generic;
 
 public class StationController : MonoBehaviour
 {
-    public GameObject CharacterPrefab; 
-    public float minSpawnInterval = 10f; // Intervalle minimal entre les apparitions de personnages
-    public float maxSpawnInterval = 20f; // Intervalle maximal entre les apparitions de personnages
-    private GameObject[] allStations; 
+    [System.Serializable]
+    public class StationMapping
+    {
+        public GameObject station;
+        public GameObject associatedObject;
+    }
+
+    public GameObject CharacterPrefab;
+    public float minSpawnInterval = 10f;
+    public float maxSpawnInterval = 20f;
+    public List<StationMapping> stationMappings = new List<StationMapping>();
     private bool isCharacterSpawning = false;
+    public float initialSpeed = 5f;
+    public Vector2 initialDirection = new Vector2(0f, 0f); // Direction initiale vers la droite
 
     void Start()
     {
-        allStations = GameObject.FindGameObjectsWithTag("Station");
         isCharacterSpawning = true;
         StartCoroutine(SpawnCharacter());
     }
@@ -25,20 +34,49 @@ public class StationController : MonoBehaviour
             Vector3 spawnposition = transform.position;
             spawnposition.y -= 20; 
             GameObject character = Instantiate(CharacterPrefab, spawnposition, Quaternion.identity);
-            character.GetComponent<MyCharacterController>().SetDestination(destinationStation);
+            GameObject prefabObject = GetAssociatedObject(destinationStation);
+            GameObject associatedObject = Instantiate(prefabObject, transform.position, Quaternion.identity);
+            character.GetComponent<MyCharacterController>().SetDestination(destinationStation, associatedObject);
+            // Obtention du composant Rigidbody2D du personnage
+            Rigidbody2D rb2d = character.GetComponent<Rigidbody2D>();
+
+            // Vérification si le composant Rigidbody2D existe
+            if (rb2d != null)
+            {
+                // Normalise la direction pour obtenir un vecteur unitaire
+                Vector2 normalizedDirection = initialDirection.normalized;
+
+                // Applique la vitesse initiale dans la direction souhaitée
+                rb2d.velocity = normalizedDirection * initialSpeed;
+            }
+            else
+            {
+                // Affiche un message d'erreur si le composant Rigidbody2D est manquant
+                Debug.LogError("Le composant Rigidbody2D est manquant sur le personnage instancié.");
+            }
+
         }
     }
 
     GameObject GetRandomDestinationStation()
     {
-        GameObject destination = allStations[Random.Range(0, allStations.Length)];
+        GameObject destination = stationMappings[Random.Range(0, stationMappings.Count)].station;
         while (destination == gameObject)
         {
-            destination = allStations[Random.Range(0, allStations.Length)];
+            destination = stationMappings[Random.Range(0, stationMappings.Count)].station;
         }
         return destination;
     }
 
-
-
+    GameObject GetAssociatedObject(GameObject station)
+    {
+        foreach (var mapping in stationMappings)
+        {
+            if (mapping.station == station)
+            {
+                return mapping.associatedObject;
+            }
+        }
+        return null;
+    }
 }
