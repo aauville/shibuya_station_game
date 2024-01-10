@@ -10,7 +10,7 @@ public class MyCharacterController : MonoBehaviour
     private bool isDragging = false;
     private List<Vector2> pathPoints = new List<Vector2>();
     private GameObject destinationStation;
-
+    public GameObject stationSign;
     private SpriteRenderer spriteRenderer;
     private LineRenderer lineRenderer;
     [SerializeField]
@@ -45,7 +45,8 @@ public class MyCharacterController : MonoBehaviour
         {
             gate = "L2R_Gate";
         }
-
+        spriteRenderer.sortingOrder = 1;
+        lineRenderer.sortingOrder = 1;
     }
 
     void Update()
@@ -162,9 +163,23 @@ public class MyCharacterController : MonoBehaviour
         }
     }
 
-    public void SetDestination(GameObject destination)
+    public void SetDestination(GameObject destination, GameObject associatedObject)
     {
         destinationStation = destination;
+        stationSign = associatedObject;
+        if (stationSign != null)
+        {
+            stationSign.transform.parent = transform;
+            float signOffset = 3.0f; // distance between cat and sign
+            Vector3 newPosition = stationSign.transform.localPosition + new Vector3(0f, signOffset, 0f);
+            stationSign.transform.localPosition = newPosition;
+
+            float newScaleX = 0.15f; 
+            float newScaleY = 0.15f;
+
+            Vector3 newScale = new Vector3(newScaleX, newScaleY, stationSign.transform.localScale.z);
+            stationSign.transform.localScale = newScale;
+        }
     }
 
     /*
@@ -200,53 +215,53 @@ public class MyCharacterController : MonoBehaviour
     }
 
     // Function to manage collision events
-    void OnCollisionEnter2D(Collision2D collision)
+    void OnTriggerEnter2D(Collider2D other)
     {
-        if (collision.gameObject == destinationStation)
+        if (other.gameObject == destinationStation)
         {
             GameManager.Instance.IncrementScore();
             Destroy(gameObject);
         }
 
-
-        if (collision.gameObject.CompareTag(gate))
+        if (other.CompareTag(gate))
         {
             // Generates the normal vector to the surface hit 
-            // Current collider is rectangular  (we can try circular to have better dynamics)
-            Vector2 hit = collision.contacts[0].normal;
+            // Current collider is rectangular (we can try circular to have better dynamics)
+            Vector2 hit = other.transform.position - transform.position;
+            hit = hit.normalized;
             wrongGate(hit);
-            //ClearPath()
+            // ClearPath()
             allowDrag = false;
 
             // Animation events
-            Animator porteAnimator = collision.gameObject.GetComponent<Animator>();
-            //Animator signAnimator = sign.GetComponent<Animator>();
+            Animator porteAnimator = other.gameObject.GetComponent<Animator>();
+            // Animator signAnimator = sign.GetComponent<Animator>();
             if (porteAnimator != null)
             {
                 porteAnimator.SetTrigger("Playerhit");
-                //signAnimator.SetTrigger("Playerhit");
+                // signAnimator.SetTrigger("Playerhit");
             }
-
         }
 
         // P2P collision
-        if (collision.gameObject.CompareTag("Player"))
+        if (other.CompareTag("Player"))
         {
             ClearPath();
         }
 
-        if (collision.gameObject.CompareTag("Gatebody"))
+        if (other.CompareTag("Gatebody"))
         {
             // Generates the normal vector to the surface hit 
-            // Current collider is rectangular  (we can try circular to have better dynamics)
-            Vector2 hit = collision.contacts[0].normal;
+            // Current collider is rectangular (we can try circular to have better dynamics)
+            Vector2 hit = other.transform.position - transform.position;
+            hit = hit.normalized;
             wrongGate(hit);
-            //ClearPath()
+            // ClearPath()
             allowDrag = false;
             ClearPath();
         }
-
     }
+
 
     // [Unused] Function to disable dragging when player inside of a colloder object (oui ça peut arriver et le perso continue sa route)
     void OnCollisionStay2D(Collision2D collision)
@@ -260,4 +275,12 @@ public class MyCharacterController : MonoBehaviour
 
     }
 
+    private void OnDestroy()
+    {
+        if (stationSign != null)
+        {
+            Destroy(stationSign);
+        }
+    }
 }
+
