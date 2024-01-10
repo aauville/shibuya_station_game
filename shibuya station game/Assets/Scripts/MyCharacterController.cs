@@ -52,7 +52,7 @@ public class MyCharacterController : MonoBehaviour
     void Update()
     {
         // if the user touches or clicks on the character, start drawing the path
-        if (Input.GetMouseButtonDown(0) )
+        if (Input.GetMouseButtonDown(0))
         {
             Vector2 touchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Collider2D hitCollider = Physics2D.OverlapPoint(touchPosition);
@@ -87,7 +87,7 @@ public class MyCharacterController : MonoBehaviour
         }
 
         // if the character has an active path, move towards the last point in the path
-        if (pathPoints.Count > 0 )
+        if (pathPoints.Count > 0)
         {
             Vector2 targetPosition = pathPoints[0];
             transform.position = Vector2.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
@@ -169,7 +169,7 @@ public class MyCharacterController : MonoBehaviour
         stationSign = associatedObject;
         if (stationSign != null)
         {
-            
+
             var originalScale = stationSign.transform.localScale;
             stationSign.transform.parent = transform;
             stationSign.transform.localScale = originalScale;
@@ -246,7 +246,10 @@ public class MyCharacterController : MonoBehaviour
         // P2P collision
         if (other.CompareTag("Player"))
         {
+            allowDrag = false;
             ClearPath();
+            /*GameManager.Instance.IncrementAnger();
+            Debug.Log("Player hit another player");*/
         }
 
         if (other.CompareTag("Gatebody"))

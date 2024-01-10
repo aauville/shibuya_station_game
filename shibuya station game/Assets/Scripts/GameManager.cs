@@ -9,6 +9,31 @@ public class GameManager : MonoBehaviour
 
     public int score = 0; // Variable pour stocker le score
     public Text scoreText; // Texte UI pour afficher le score
+    public int anger = 0;
+    private int bestScore = 0;
+
+    public delegate void GameOverAction();
+    public static event GameOverAction OnGameOver;
+
+
+    private void Start()
+    {
+        LoadBestScore();
+    }
+
+    private void SaveBestScore()
+    {
+        PlayerPrefs.SetInt("BestScore", bestScore);
+        PlayerPrefs.Save();
+    }
+
+    private void LoadBestScore()
+    {
+        if (PlayerPrefs.HasKey("BestScore"))
+        {
+            bestScore = PlayerPrefs.GetInt("BestScore");
+        }
+    }
 
     void Awake()
     {
@@ -28,6 +53,27 @@ public class GameManager : MonoBehaviour
     {
         score++;
         UpdateScoreText();
+        if (score > bestScore)
+        {
+            bestScore = score;
+            SaveBestScore();
+        }
+    }
+
+    public void IncrementAnger()
+    {
+        anger++;
+    }
+
+    public void ResetScore()
+    {
+        score = 0;
+        UpdateScoreText();
+    }
+
+    public void ResetAnger()
+    {
+        anger = 0;
     }
 
     // Fonction pour mettre à jour le texte du score
@@ -38,4 +84,16 @@ public class GameManager : MonoBehaviour
             scoreText.text = "Score: " + score;
         }
     }
+
+    private void Update()
+    {
+        if (anger > 10)
+        {
+            if (OnGameOver != null)
+            {
+                OnGameOver();
+            }
+        }
+    }
+
 }
