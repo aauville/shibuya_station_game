@@ -35,7 +35,12 @@ public class StationController : MonoBehaviour
             spawnposition.y -= 20; 
             GameObject character = Instantiate(CharacterPrefab, spawnposition, Quaternion.identity);
             GameObject prefabObject = GetAssociatedObject(destinationStation);
-            GameObject associatedObject = Instantiate(prefabObject, transform.position, Quaternion.identity);
+        
+            Vector3 spawnPosition = transform.position;  
+            Quaternion spawnRotation = Quaternion.identity;
+            GameObject associatedObject = Instantiate(prefabObject, spawnPosition, spawnRotation);
+            associatedObject.transform.localScale = prefabObject.transform.localScale;
+
             character.GetComponent<MyCharacterController>().SetDestination(destinationStation, associatedObject);
             // Obtention du composant Rigidbody2D du personnage
             Rigidbody2D rb2d = character.GetComponent<Rigidbody2D>();

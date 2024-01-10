@@ -169,18 +169,18 @@ public class MyCharacterController : MonoBehaviour
         stationSign = associatedObject;
         if (stationSign != null)
         {
+            
+            var originalScale = stationSign.transform.localScale;
             stationSign.transform.parent = transform;
+            stationSign.transform.localScale = originalScale;
+
             float signOffset = 3.0f; // distance between cat and sign
             Vector3 newPosition = stationSign.transform.localPosition + new Vector3(0f, signOffset, 0f);
             stationSign.transform.localPosition = newPosition;
 
-            float newScaleX = 0.15f; 
-            float newScaleY = 0.15f;
-
-            Vector3 newScale = new Vector3(newScaleX, newScaleY, stationSign.transform.localScale.z);
-            stationSign.transform.localScale = newScale;
         }
     }
+
 
     /*
     private void ArrivedAtDestination()
