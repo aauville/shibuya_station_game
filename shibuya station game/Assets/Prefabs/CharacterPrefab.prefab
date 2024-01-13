@@ -49,7 +49,7 @@ CircleCollider2D:
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
-  m_Radius: 1
+  m_Radius: 2
 --- !u!114 &9043470638695838808
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -62,14 +62,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7d162d50b74e49bbbadd5ba1e8bb785, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 150
+  moveSpeed: 130
   lineSize: 5
+  stationSign: {fileID: 0}
   characterSprites:
   - {fileID: 21300000, guid: a29605b83c1004b8e94ed222d0c98141, type: 3}
   - {fileID: 21300000, guid: 4395bc662d5af428694b96a9ef1217e1, type: 3}
   - {fileID: 21300000, guid: 0e0b244298de443ff99efb32072f1d02, type: 3}
   - {fileID: 21300000, guid: 9f5678de081904a07adb0d271ae5d40d, type: 3}
   - {fileID: 21300000, guid: 24616480f3f394a85be8414e8a174eda, type: 3}
+  canMove: 1
   LRdir: 0
 --- !u!212 &5266432425249950690
 SpriteRenderer:
@@ -140,5 +142,5 @@ Rigidbody2D:
   m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 0
-  m_Constraints: 0
+  m_CollisionDetection: 1
+  m_Constraints: 4
