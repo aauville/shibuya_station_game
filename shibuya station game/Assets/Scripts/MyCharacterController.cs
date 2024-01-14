@@ -16,6 +16,7 @@ public class MyCharacterController : MonoBehaviour
     [SerializeField]
     public List<Sprite> characterSprites;
     Rigidbody2D rb;
+    public bool canMove = true;
 
     private bool allowDrag = true; // [Unused] enable/disable dragging in can of problem with collisions (can still pass through if LMB is held)
     private bool hitGate = false; // On when wrong gate hit
@@ -38,8 +39,10 @@ public class MyCharacterController : MonoBehaviour
         lineRenderer.textureMode = LineTextureMode.Tile;
         ChooseRandomSprite();
         rb = gameObject.GetComponent<Rigidbody2D>();
+        /*
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         Physics2D.IgnoreCollision(player.GetComponent<Collider2D>(), GetComponent<Collider2D>());
+        */
         // Set the correct gate tag 
         if (LRdir == false)
         {
@@ -52,7 +55,7 @@ public class MyCharacterController : MonoBehaviour
     void Update()
     {
         // if the user touches or clicks on the character, start drawing the path
-        if (Input.GetMouseButtonDown(0) )
+        if (Input.GetMouseButtonDown(0))
         {
             Vector2 touchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Collider2D hitCollider = Physics2D.OverlapPoint(touchPosition);
@@ -87,7 +90,7 @@ public class MyCharacterController : MonoBehaviour
         }
 
         // if the character has an active path, move towards the last point in the path
-        if (pathPoints.Count > 0 )
+        if (pathPoints.Count > 0 && canMove)
         {
             Vector2 targetPosition = pathPoints[0];
             transform.position = Vector2.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
@@ -106,8 +109,14 @@ public class MyCharacterController : MonoBehaviour
                 // Set transparency based on distance to the character
                 UpdateLineTransparency();
             }
-
         }
+
+        if (!canMove)
+        {
+            ClearPath();
+            canMove = true;
+        }
+
         else if (pathPoints.Count == 0)
         {
             hitGate = false;
@@ -169,34 +178,19 @@ public class MyCharacterController : MonoBehaviour
         stationSign = associatedObject;
         if (stationSign != null)
         {
+
+            var originalScale = stationSign.transform.localScale;
             stationSign.transform.parent = transform;
+            stationSign.transform.localScale = originalScale;
+
             float signOffset = 3.0f; // distance between cat and sign
             Vector3 newPosition = stationSign.transform.localPosition + new Vector3(0f, signOffset, 0f);
             stationSign.transform.localPosition = newPosition;
 
-            float newScaleX = 0.15f; 
-            float newScaleY = 0.15f;
-
-            Vector3 newScale = new Vector3(newScaleX, newScaleY, stationSign.transform.localScale.z);
-            stationSign.transform.localScale = newScale;
         }
     }
 
-    /*
-    private void ArrivedAtDestination()
-    {
-        if (IsAtCorrectStation(destinationStation.GetComponent<BoxCollider2D>()))
-        {
-            GameManager.Instance.IncrementScore();
-            Destroy(gameObject);
-        }
-    }
 
-    private bool IsAtCorrectStation(BoxCollider2D stationCollider)
-    {
-        return stationCollider.OverlapPoint(transform.position);
-    }
-    */
     private void ChooseRandomSprite()
     {
         if (characterSprites != null && characterSprites.Count > 0)
@@ -211,6 +205,17 @@ public class MyCharacterController : MonoBehaviour
         else
         {
             Debug.LogWarning("No sprite defined in the list characterSprites");
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        if (other.gameObject.CompareTag("Player"))
+        {
+            Debug.LogError("Collision");
+            ClearPath();
+            GameManager.Instance.IncrementAnger();
+            canMove = false;
         }
     }
 
@@ -243,10 +248,13 @@ public class MyCharacterController : MonoBehaviour
             }
         }
 
-        // P2P collision
-        if (other.CompareTag("Player"))
+        //just in case 
+        if (other.gameObject.CompareTag("Player"))
         {
+            Debug.LogError("Collision");
             ClearPath();
+            GameManager.Instance.IncrementAnger();
+            canMove = false;
         }
 
         if (other.CompareTag("Gatebody"))

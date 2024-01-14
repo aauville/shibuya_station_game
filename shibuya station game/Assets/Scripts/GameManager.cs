@@ -9,6 +9,53 @@ public class GameManager : MonoBehaviour
 
     public int score = 0; // Variable pour stocker le score
     public Text scoreText; // Texte UI pour afficher le score
+    public Text bestScoreText;
+    public Text lastScoreText;
+    public int anger = 0;
+    private int bestScore = 0;
+    private int lastScore = 0;
+    public Image angerBar;
+
+    [SerializeField]
+    public float maxAnger = 10f;
+
+    public delegate void GameOverAction();
+    public static event GameOverAction OnGameOver;
+
+
+    private void Start()
+    {
+        LoadBestScore();
+        LoadLastScore();
+    }
+
+    private void SaveBestScore()
+    {
+        PlayerPrefs.SetInt("BestScore", bestScore);
+        PlayerPrefs.Save();
+    }
+
+    private void SaveLastScore()
+    {
+        PlayerPrefs.SetInt("LastScore", score);
+        PlayerPrefs.Save();
+    }
+
+    private void LoadBestScore()
+    {
+        if (PlayerPrefs.HasKey("BestScore"))
+        {
+            bestScore = PlayerPrefs.GetInt("BestScore");
+        }
+    }
+
+    private void LoadLastScore()
+    {
+        if (PlayerPrefs.HasKey("LastScore"))
+        {
+            lastScore = PlayerPrefs.GetInt("LastScore");
+        }
+    }
 
     void Awake()
     {
@@ -28,6 +75,29 @@ public class GameManager : MonoBehaviour
     {
         score++;
         UpdateScoreText();
+        if (score > bestScore)
+        {
+            bestScore = score;
+            SaveBestScore();
+        }
+    }
+
+    public void IncrementAnger()
+    {
+        anger++;
+        angerBar.fillAmount = anger / maxAnger;
+    }
+
+    public void ResetScore()
+    {
+        score = 0;
+        SaveLastScore();
+        UpdateScoreText();
+    }
+
+    public void ResetAnger()
+    {
+        anger = 0;
     }
 
     // Fonction pour mettre à jour le texte du score
@@ -38,4 +108,34 @@ public class GameManager : MonoBehaviour
             scoreText.text = "Score: " + score;
         }
     }
+
+    void UpdateBestScoreText()
+    {
+        if (bestScoreText != null)
+        {
+            bestScoreText.text = "Best Score: " + bestScore;
+        }
+    }
+
+    void UpdateLastScoreText()
+    {
+        if (lastScoreText != null)
+        {
+            lastScoreText.text = "Score: " + lastScore;
+        }
+    }
+    private void Update()
+    {
+        if (anger >= maxAnger)
+        {
+            if (OnGameOver != null)
+            {
+                SaveLastScore();
+                OnGameOver();
+            }
+        }
+        UpdateBestScoreText();
+        UpdateLastScoreText();
+    }
+
 }
