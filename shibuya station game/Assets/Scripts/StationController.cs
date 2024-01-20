@@ -41,7 +41,42 @@ public class StationController : MonoBehaviour
             GameObject associatedObject = Instantiate(prefabObject, spawnPosition, spawnRotation);
             associatedObject.transform.localScale = prefabObject.transform.localScale;
 
-            character.GetComponent<MyCharacterController>().SetDestination(destinationStation, associatedObject);
+            string direction = "none";
+            string dirName = destinationStation.name;
+            string srcName = gameObject.name;
+
+            if(srcName == "Station 1")
+            {
+                if (dirName== "Station 2")
+                {
+                    direction = "tsf";
+                }
+                else if(dirName == "Exit")
+                {
+                    direction = "out";
+                }
+            }
+            else if (srcName == "Station 2")
+            {
+                if (dirName == "Station 1")
+                {
+                    direction = "tsf";
+                }
+                else if (dirName == "Exit")
+                {
+                    direction = "out";
+                }
+            }
+            else if (srcName == "Exit")
+            {
+                if (dirName == "Station 1" || dirName == "Station 2")
+                {
+                    direction = "in";
+                }
+            }
+
+
+            character.GetComponent<MyCharacterController>().SetDestination(destinationStation, associatedObject,direction);
             // Obtention du composant Rigidbody2D du personnage
             Rigidbody2D rb2d = character.GetComponent<Rigidbody2D>();
 
